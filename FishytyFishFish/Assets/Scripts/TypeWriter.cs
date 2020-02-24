@@ -28,10 +28,6 @@ public class TypeWriter : MonoBehaviour {
         TypeWriter.instance.StartCoroutine("PlayText");
     }
 
-    public static bool is_writing { get { return is_writing_; } }
-    public static bool is_done { get { return is_done_; } set { is_done_ = value; } }
-    public static float typewriter_delay { get { return typewriter_delay_; } set { typewriter_delay_ = value; } }
-
     IEnumerator PlayText() {
         is_writing_ = true;
         foreach (char c in story_) {
@@ -41,4 +37,8 @@ public class TypeWriter : MonoBehaviour {
         is_writing_ = false;
         is_done_ = true;
     }
+
+    public static bool is_writing { get { return is_writing_; } }
+    public static bool is_done { get { return is_done_; } set { is_done_ = value; } }
+    public static float typewriter_delay { get { return typewriter_delay_; } set { typewriter_delay_ = value; } }
 }

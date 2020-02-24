@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 public class DialogMaster : MonoBehaviour {
 
-    public List<question> question_list = new List<question>();
+    public static List<question> question_list = new List<question>();
     public question question_cursor;
     public GameObject buttonPrefab;
-    public int buttonPressed = -1;
     public float text_delay = 0.125f;
+
+    private bool hasCreatedButtons = false;
     // Start is called before the first frame update
     void Start() {
         AddButton.buttonPrefab = buttonPrefab;
 
         question q1 = new question("Hello Fellow human would you like a coffee?", text_delay);
-        question q2 = new question("Aha I understand your situation now please be ready to die", 0.05f);
+        question q2 = new question("Aha I understand your situation now please be ready to die", text_delay / 2);
 
 
         List<anwser> list = new List<anwser>();
@@ -34,32 +35,33 @@ public class DialogMaster : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        // start the printing of the text
         if (!TypeWriter.is_done && !TypeWriter.is_writing) {
             TypeWriter.typewriter_delay = question_cursor.text_delay;
             TypeWriter.StartTypewriter(question_cursor.text);
-            for(int i = 0; i < question_cursor.anwser.Count; i++) {
+        }
+        // add the buttons when the text has finished printing
+        if (TypeWriter.is_done && !hasCreatedButtons) {
+            for (int i = 0; i < question_cursor.anwser.Count; i++) {
                 AddButton.MakeButton(question_cursor.anwser[i].text, this, i);
             }
-        }
-        if (buttonPressed >= 0) {
-            if (question_cursor.anwser[buttonPressed].next_question != null) {
-                question_cursor = question_cursor.anwser[buttonPressed].next_question;
-                buttonPressed = -1;
-            }
-
+            hasCreatedButtons = true;
         }
     }
     public void OnClick(int index) {
+        // Remove all the previous buttons
         Transform parent = GameObject.Find("CommandPanel").transform;
         foreach (Transform child in parent) {
             Destroy(child.gameObject);
         }
 
-
+        // Go to the corresponding button press question
         if (question_cursor.anwser[index].next_question != null) {
             question_cursor = question_cursor.anwser[index].next_question;
         }
+        // reset the typewriter and button creator
         TypeWriter.is_done = false;
+        hasCreatedButtons = false;
     }
 }
 
@@ -72,7 +74,7 @@ public class question {
     public string text { get; set; }
     public List<anwser> anwser { get; set; }
 }
-
+       
 public class anwser {
     public anwser(string text, question next_question) {
         this.text = text;
