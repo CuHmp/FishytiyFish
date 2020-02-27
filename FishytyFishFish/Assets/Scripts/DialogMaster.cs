@@ -1,6 +1,15 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
+public enum tags {
+    night,
+    morning,
+    lunch,
+    lying,
+    no_tag,
+}
+[System.Serializable]
 public class DialogMaster : MonoBehaviour {
 
     public static List<question> question_list = new List<question>();
@@ -10,22 +19,36 @@ public class DialogMaster : MonoBehaviour {
 
     private bool hasCreatedButtons = false;
 
+    public List<UIQuestionHolder> questions;
+
     void Start() {
         AddButton.buttonPrefab = buttonPrefab;
 
-        question_list.Add(QuestionFactory.CreateQuestion("Aha I understand your situation now please be ready to die",
-                                                        text_delay, new string[] { "test1", "asdf", "Leet Mega Haxor" },
-                                                        new question[] { null,null,null }, 3));
-        question_list.Add(QuestionFactory.CreateQuestion("Here you go you litle shit",
-                                                         text_delay, new string[] { ";(", "What", "Stab officer" },
-                                                         new question[] { question_list[0], question_list[0], question_list[0] }, 3));
-        question_list.Add(QuestionFactory.CreateQuestion("The Cop leave you alone in the room to grab a coffy",
-                                                 text_delay, new string[] { "Okey" },
-                                                 new question[] { question_list[1] }, 1));
-        question_list.Add(QuestionFactory.CreateQuestion("Hello Fellow human would you like a coffee?",
-                                                 text_delay, new string[] { "Yes", "No", "Draw gun" },
-                                                 new question[] { question_list[2], question_list[1], question_list[0] }, 3));
-        question_list.Reverse();
+//        questions.Reverse();
+
+        for (int i = 0; i < questions.Count; i++) {
+            question q = new question(questions[i].text, questions[i].text_delay);
+            List<anwser> anwser_list = new List<anwser>();
+            for(int j = 0; j < questions[i].anwser_list.Count; j++) {
+                anwser a = new anwser(questions[i].anwser_list[j].text, null, questions[i].anwser_list[j].tag);
+                anwser_list.Add(a);
+            }
+            q.anwser = anwser_list;
+            question_list.Add(q);
+        }
+
+        for (int i = 0; i < questions.Count; i++) {
+            for (int j = 0; j < questions[i].anwser_list.Count; j++) {
+                if (questions[i].anwser_list[j].next_question == -1) {
+                    question_list[i].anwser[j].next_question = null;
+                    continue;
+                }
+                else {
+                    question_list[i].anwser[j].next_question = question_list[questions[i].anwser_list[j].next_question];
+                }
+            }
+        }
+
 
         question_cursor = question_list[0];
     }
@@ -46,6 +69,8 @@ public class DialogMaster : MonoBehaviour {
     }
 
     public void OnClick(int index) {
+        question_cursor.anwsered_tag = question_cursor.anwser[index].anwser_tag;
+
         // Remove all the previous buttons
         Transform parent = GameObject.Find("CommandPanel").transform;
         foreach (Transform child in parent) {
@@ -67,21 +92,16 @@ public class DialogMaster : MonoBehaviour {
     }
 }
 
-public class question {
-    public question(string text, float delay) {
-        this.text = text;
-        this.text_delay = delay;
-    }
-    public float text_delay { get; set; }
-    public string text { get; set; }
-    public List<anwser> anwser { get; set; }
+[System.Serializable]
+public class UIAnwsersHolder {
+    public string text;
+    public tags tag;
+    public int next_question;
 }
-       
-public class anwser {
-    public anwser(string text, question next_question) {
-        this.text = text;
-        this.next_question = next_question;
-    }
-    public string text { get; set; }
-    public question next_question { get; set; }
+
+[System.Serializable]
+public class UIQuestionHolder {
+    public string text = "";
+    public float text_delay;
+    public List<UIAnwsersHolder> anwser_list;
 }
