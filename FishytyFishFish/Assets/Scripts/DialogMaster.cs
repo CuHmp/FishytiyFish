@@ -3,10 +3,8 @@ using UnityEditor;
 using UnityEngine;
 
 public enum tags {
-    night,
-    morning,
-    lunch,
     lying,
+    truth,
     no_tag,
 }
 [System.Serializable]
@@ -70,6 +68,8 @@ public class DialogMaster : MonoBehaviour {
 
     public void OnClick(int index) {
         question_cursor.anwsered_tag = question_cursor.anwser[index].anwser_tag;
+        question_cursor.question_index = index;
+
 
         // Remove all the previous buttons
         Transform parent = GameObject.Find("CommandPanel").transform;
@@ -84,7 +84,25 @@ public class DialogMaster : MonoBehaviour {
         }
         else {
             hasCreatedButtons = true;
-            TypeWriter.StartTypewriter("Game over, thank you for playing");
+            int truth = 0;
+            int lying = 0;
+
+            for(int i = 0; i < question_list.Count; i++) {
+                if(question_list[i].anwsered_tag == tags.truth) {
+                    truth++;
+                }
+                if(question_list[i].anwsered_tag == tags.lying) {
+                    lying++;
+                }
+            }
+
+            if(truth >= lying) {
+                TypeWriter.StartTypewriter("Game over, the cops is going to investigate and jail Karen");
+            }
+            else {
+                TypeWriter.StartTypewriter("Game over, the cops is going to investigate and jail you");
+            }
+            //TypeWriter.StartTypewriter("Game over, thank you for playing");
         }
         // reset the typewriter and button creator
         TypeWriter.is_done = false;

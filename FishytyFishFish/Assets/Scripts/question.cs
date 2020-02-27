@@ -10,5 +10,6 @@ public class question {
     public string text { get; set; }
     public List<anwser> anwser { get; set; }
     public tags anwsered_tag { get; set; }
+    public int question_index { get; set; }
 }
 
