@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 public enum tags {
+    time_question,
     lying,
     truth,
     no_tag,
@@ -11,6 +12,9 @@ public enum tags {
 public class DialogMaster : MonoBehaviour {
 
     public static List<question> question_list = new List<question>();
+    private static List<question> result_question_list = new List<question>();
+    private static List<question> time_question_list = new List<question>();
+    private int correct_time_index = 16;
     public question question_cursor;
     public GameObject buttonPrefab;
     public float text_delay = 0.125f;
@@ -67,9 +71,23 @@ public class DialogMaster : MonoBehaviour {
     }
 
     public void OnClick(int index) {
+
+
+
         question_cursor.anwsered_tag = question_cursor.anwser[index].anwser_tag;
         question_cursor.question_index = index;
+        result_question_list.Add(question_cursor);
 
+        if (question_cursor.anwser[index].anwser_tag == tags.time_question) {
+            time_question_list.Add(question_cursor);
+            Debug.Log("Added time question");
+            if (time_question_list.Count > 1) {
+                if (time_question_list[1].question_index == time_question_list[0].question_index) {
+                    question_cursor = question_list[correct_time_index];
+                }
+            }
+
+        }
 
         // Remove all the previous buttons
         Transform parent = GameObject.Find("CommandPanel").transform;
@@ -84,25 +102,33 @@ public class DialogMaster : MonoBehaviour {
         }
         else {
             hasCreatedButtons = true;
-            int truth = 0;
-            int lying = 0;
 
-            for(int i = 0; i < question_list.Count; i++) {
-                if(question_list[i].anwsered_tag == tags.truth) {
-                    truth++;
-                }
-                if(question_list[i].anwsered_tag == tags.lying) {
-                    lying++;
-                }
-            }
+            //int truth = 0;
+            //int lying = 0;
 
-            if(truth >= lying) {
-                TypeWriter.StartTypewriter("Game over, the cops is going to investigate and jail Karen");
-            }
-            else {
-                TypeWriter.StartTypewriter("Game over, the cops is going to investigate and jail you");
-            }
-            //TypeWriter.StartTypewriter("Game over, thank you for playing");
+
+
+            //for(int i = 0; i < result_question_list.Count; i++) {
+            //    if(result_question_list[i].anwsered_tag == tags.truth) {
+            //        truth++;
+            //    }
+            //    if(result_question_list[i].anwsered_tag == tags.lying) {
+            //        lying++;
+            //    }
+            //}
+
+            //if(truth > lying) {
+            //    TypeWriter.StartTypewriter("Game over, the cops is going to investigate and jail Karen");
+            //}
+            //else if(truth < lying) {
+            //    TypeWriter.StartTypewriter("Game over, the cops is going to investigate and jail you");
+            //}
+            //else {
+            //    TypeWriter.StartTypewriter("Game over, the cops is going to investigate both of you");
+            //}
+            question_cursor = question_list[0];
+            time_question_list.Clear();
+            result_question_list.Clear();
         }
         // reset the typewriter and button creator
         TypeWriter.is_done = false;
